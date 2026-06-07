@@ -1,0 +1,59 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Admin User",
+      "email": "admin@attendance.com",
+      "password": "$2b$10$xPLgv6xqNMPhOLWmmCG9t.1tbZN6SIpsPfdvxX//w0MBRHRTmZTjC",
+      "role": "admin",
+      "department": "Management"
+    },
+    {
+      "id": "2",
+      "name": "Employee",
+      "email": "john@attendance.com",
+      "password": "$2b$10$WCru9G4Q8TnH96VDv/o6zO3JbiGo1Q8jJAPN84PFwAur.yUlslzq6",
+      "role": "employee",
+      "department": "Engineering"
+    },
+    {
+      "id": "3",
+      "name": "HR Manager",
+      "email": "hr@attendance.com",
+      "password": "$2b$10$5GcflI0Poy2Z4rlLlAltzutqirB2j4arW9C/7GmCB654N7hPBNp7O",
+      "role": "hr",
+      "department": "Human Resources"
+    },
+    {
+      "id": "4",
+      "name": "Team Lead",
+      "email": "lead@attendance.com",
+      "password": "$2b$10$pubnH66Ve3v4GyNo1H3eI.pCSHhBV1vzmg4FBIkDeNJk9nZqpp5AG",
+      "role": "team_lead",
+      "department": "Engineering"
+    },
+    {
+      "id": "5",
+      "name": "Intern",
+      "email": "intern@attendance.com",
+      "password": "$2b$10$JaMYQQnDxXXCcD.NYt4YkOCxS4zjxIb2ywrl9YVc4sryIVybaFmbm",
+      "role": "intern",
+      "department": "Engineering"
+    }
+  ],
+  "attendance": [
+    {
+      "userId": "3",
+      "date": "2026-03-13",
+      "clockIn": "5:32:57 pm",
+      "clockOut": "5:33:14 pm"
+    },
+    {
+      "userId": "4",
+      "date": "2026-03-13",
+      "clockIn": "5:33:49 pm",
+      "clockOut": "5:33:52 pm"
+    }
+  ],
+  "leaves": []
+}

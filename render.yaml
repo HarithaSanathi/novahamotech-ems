@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: novahamotech-backend
+    env: node
+    plan: free
+    repo: https://github.com/HarithaSanathi/novahamotech-ems
+    branch: main
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false

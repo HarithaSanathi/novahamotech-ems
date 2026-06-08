@@ -182,7 +182,7 @@ function App() {
             </button>
           </form>
           <div style={{ marginTop: 20, textAlign: 'center', fontSize: '12px', color: '#475569', lineHeight: 1.7 }}>
-            Demo: <strong>admin@ · hr@ · lead@ · intern@ · john@</strong><br />Password: role + 123 (e.g. admin123)
+            Demo: <strong>admin@ · hr@</strong>
           </div>
         </div>
       </div>

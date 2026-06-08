@@ -13,7 +13,7 @@ function PayslipModal({ slip, onClose }) {
   const handlePrint = () => window.print();
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div id="payslip-print-wrapper" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div id="payslip-box" style={{ background: '#fff', color: '#1e293b', borderRadius: 16, padding: '40px', width: 560, maxHeight: '90vh', overflowY: 'auto', fontFamily: 'Inter, sans-serif' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, paddingBottom: 20, borderBottom: '2px solid #6366f1' }}>

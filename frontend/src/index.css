@@ -131,7 +131,9 @@ td { padding:16px; border-bottom:1px solid rgba(255,255,255,0.05); }
 /* Print styles */
 @media print {
   body > * { display:none !important; }
-  #payslip-box { display:block !important; position:fixed; inset:0; background:white; color:#1e293b; }
+  #payslip-print-wrapper, #payslip-box { display:block !important; }
+  #payslip-print-wrapper { position: static !important; inset: auto !important; background: transparent !important; }
+  #payslip-box { position: static !important; inset: auto !important; width: auto !important; max-height: none !important; box-shadow: none !important; margin: 0 !important; }
   .no-print { display:none !important; }
 }
 .mobile-menu-btn { display: none; }

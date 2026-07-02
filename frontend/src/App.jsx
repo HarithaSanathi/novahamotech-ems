@@ -23,6 +23,15 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
   const emailInputRef = useRef(null);
 
+  // Core dashboard states defined at the top
+  const [attendance, setAttendance] = useState([]);
+  const [leaves, setLeaves] = useState([]);
+  const [adminStats, setAdminStats] = useState(null);
+  const [adminLeaves, setAdminLeaves] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [activeTab, setActiveTab] = useState('dashboard');
+
   // Auto focus first input field when login form is shown
   useEffect(() => {
     if (!showLanding && !user) {
@@ -229,16 +238,6 @@ function App() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [sidebarOpen]);
-
-  // Existing state definitions continue...
-
-  const [attendance, setAttendance] = useState([]);
-  const [leaves, setLeaves] = useState([]);
-  const [adminStats, setAdminStats] = useState(null);
-  const [adminLeaves, setAdminLeaves] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [activeTab, setActiveTab] = useState('dashboard');
 
   const [leaveForm, setLeaveForm] = useState({ type: 'casual', startDate: '', endDate: '', reason: '' });
   const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'employee', department: 'General', baseSalary: 30000 });

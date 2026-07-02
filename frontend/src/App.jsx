@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 import {
   LogOut, Clock, Calendar, User, Shield, CheckCircle, XCircle, Users,
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import LandingPage from './LandingPage';
 import { AdminSalaryPanel, EmployeePayslipPanel } from './SalaryPanel';
+
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
 
@@ -20,7 +21,203 @@ function App() {
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [openCategory, setOpenCategory] = useState('general');
+  const sidebarRef = useRef(null);
+  const menuButtonRef = useRef(null);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  // Navigation categories configuration based on user role
+  const getNavCategories = (role) => {
+    switch (role) {
+      case 'admin':
+        return [
+          {
+            id: 'general',
+            title: 'Overview',
+            items: [
+              { tab: 'dashboard', icon: <Shield size={18} />, label: 'Admin Hub' },
+              { tab: 'users', icon: <Users size={18} />, label: 'Manage Users' },
+              { tab: 'activity', icon: <Activity size={18} />, label: 'System Logs' }
+            ]
+          },
+          {
+            id: 'leaves',
+            title: 'Leaves',
+            items: [
+              { tab: 'leaves_admin', icon: <FileText size={18} />, label: 'Leave Board' }
+            ]
+          },
+          {
+            id: 'finance',
+            title: 'Finance',
+            items: [
+              { tab: 'salary', icon: <DollarSign size={18} />, label: 'Salary & Payroll' }
+            ]
+          }
+        ];
+      case 'hr':
+        return [
+          {
+            id: 'general',
+            title: 'Overview',
+            items: [
+              { tab: 'dashboard', icon: <Shield size={18} />, label: 'HR Dashboard' },
+              { tab: 'users', icon: <Users size={18} />, label: 'Employee Records' },
+              { tab: 'activity', icon: <CheckCircle size={18} />, label: 'Attendance Log' }
+            ]
+          },
+          {
+            id: 'leaves',
+            title: 'Leaves',
+            items: [
+              { tab: 'leaves_admin', icon: <FileText size={18} />, label: 'Leave Approvals' }
+            ]
+          },
+          {
+            id: 'finance',
+            title: 'Finance',
+            items: [
+              { tab: 'salary', icon: <DollarSign size={18} />, label: 'Salary & Payroll' }
+            ]
+          }
+        ];
+      case 'team_lead':
+        return [
+          {
+            id: 'general',
+            title: 'Overview',
+            items: [
+              { tab: 'dashboard', icon: <Briefcase size={18} />, label: 'Lead Center' }
+            ]
+          },
+          {
+            id: 'leaves',
+            title: 'Leaves',
+            items: [
+              { tab: 'leaves_me', icon: <Calendar size={18} />, label: 'My Leaves' }
+            ]
+          },
+          {
+            id: 'finance',
+            title: 'Finance & Workflow',
+            items: [
+              { tab: 'payslip', icon: <Printer size={18} />, label: 'My Payslip' },
+              { tab: 'assign_tasks', icon: <UserPlus size={18} />, label: 'Assign Tasks' },
+              { tab: 'team_progress', icon: <FolderGit2 size={18} />, label: 'Team Progress' }
+            ]
+          }
+        ];
+      case 'intern':
+        return [
+          {
+            id: 'general',
+            title: 'Overview',
+            items: [
+              { tab: 'dashboard', icon: <LayoutDashboard size={18} />, label: 'Intern Portal' }
+            ]
+          },
+          {
+            id: 'leaves',
+            title: 'Leaves',
+            items: [
+              { tab: 'leaves_me', icon: <Calendar size={18} />, label: 'My Leaves' }
+            ]
+          },
+          {
+            id: 'finance',
+            title: 'Finance & Tasks',
+            items: [
+              { tab: 'payslip', icon: <Printer size={18} />, label: 'My Payslip' },
+              { tab: 'my_tasks', icon: <ListTodo size={18} />, label: 'Assigned Tasks' }
+            ]
+          }
+        ];
+      case 'employee':
+      default:
+        return [
+          {
+            id: 'general',
+            title: 'Overview',
+            items: [
+              { tab: 'dashboard', icon: <LayoutDashboard size={18} />, label: 'My Dashboard' }
+            ]
+          },
+          {
+            id: 'leaves',
+            title: 'Leaves',
+            items: [
+              { tab: 'leaves_me', icon: <Calendar size={18} />, label: 'My Leaves' }
+            ]
+          },
+          {
+            id: 'finance',
+            title: 'Finance',
+            items: [
+              { tab: 'payslip', icon: <Printer size={18} />, label: 'My Payslip' }
+            ]
+          }
+        ];
+    }
+  };
+
+  // Keep open category aligned with active tab
+  useEffect(() => {
+    if (!user) return;
+    const categories = getNavCategories(user.role);
+    const activeCategory = categories.find(cat => cat.items.some(item => item.tab === activeTab));
+    if (activeCategory) {
+      setOpenCategory(activeCategory.id);
+    }
+  }, [activeTab, user]);
+
+  // Handle mobile drawer body-scroll lock, ESC keys, and focus traps
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSidebarOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+      if (e.key === 'Tab' && sidebarOpen && sidebarRef.current) {
+        const focusable = sidebarRef.current.querySelectorAll(
+          'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              last.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === last) {
+              first.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      }
+    };
+
+    if (sidebarOpen) {
+      document.body.classList.add('scroll-locked');
+      document.addEventListener('keydown', handleKeyDown);
+      const focusable = sidebarRef.current?.querySelectorAll('button, [href]');
+      if (focusable && focusable.length > 0) {
+        // focus close button or first link
+        focusable[0].focus();
+      }
+    } else {
+      document.body.classList.remove('scroll-locked');
+    }
+
+    return () => {
+      document.body.classList.remove('scroll-locked');
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [sidebarOpen]);
 
   // Existing state definitions continue...
 
@@ -188,7 +385,10 @@ function App() {
 
   // ── SIDEBAR BUTTON ──
   const SidebarBtn = ({ tab, icon, label }) => (
-    <button onClick={() => setActiveTab(tab)}
+    <button onClick={() => {
+      setActiveTab(tab);
+      setSidebarOpen(false);
+    }}
       style={{ display: 'flex', alignItems: 'center', gap: 12, border: 'none', width: '100%', background: activeTab === tab ? 'linear-gradient(135deg,#6366f1,#c084fc)' : 'transparent', color: activeTab === tab ? 'white' : '#64748b', cursor: 'pointer', marginBottom: 4, padding: '12px 16px', borderRadius: 10, fontWeight: 600, fontSize: '0.9rem', transition: 'all 0.2s', textAlign: 'left' }}>
       {icon} <span>{label}</span>
     </button>
@@ -197,53 +397,59 @@ function App() {
   // ── MAIN DASHBOARD ──
   return (
     <div className="dashboard-layout">
+      {/* Background Overlay */}
+      <div 
+        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} 
+        onClick={() => setSidebarOpen(false)}
+      />
+
       {/* Mobile menu button */}
-      <button className="mobile-menu-btn" onClick={toggleSidebar} aria-label="Toggle navigation">
+      <button 
+        ref={menuButtonRef}
+        className="mobile-menu-btn" 
+        onClick={toggleSidebar} 
+        aria-label="Toggle navigation"
+      >
         <Menu size={24} color="var(--text-primary)" />
       </button>
-      {/* Sidebar */}
-      <aside className={`sidebar glass-card ${sidebarOpen ? 'open' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
 
-        <div style={{ padding: '28px 20px 16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img src="/logo1.jpg" alt="Logo" style={{ width: 36, height: 36, borderRadius: '8px', objectFit: 'cover' }} />
-          <div>
-            <div style={{ fontWeight: 900, fontSize: '1rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Novahamotechnologies</div>
-            <div style={{ fontSize: '0.65rem', color: '#334155', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: 2 }}>EMS Platform</div>
+      {/* Sidebar */}
+      <aside 
+        ref={sidebarRef}
+        className={`sidebar glass-card ${sidebarOpen ? 'open' : ''}`} 
+        style={{ display: 'flex', flexDirection: 'column' }}
+      >
+        <div style={{ padding: '28px 20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img src="/logo1.jpg" alt="Logo" style={{ width: 36, height: 36, borderRadius: '8px', objectFit: 'cover' }} />
+            <div>
+              <div style={{ fontWeight: 900, fontSize: '1rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Novahamotech</div>
+              <div style={{ fontSize: '0.65rem', color: '#64748b', letterSpacing: '1.5px', textTransform: 'uppercase', marginTop: 2 }}>EMS Platform</div>
+            </div>
           </div>
+          <button className="sidebar-close-btn" onClick={() => setSidebarOpen(false)} aria-label="Close menu">
+            <X size={20} />
+          </button>
         </div>
+        
         <nav style={{ flex: 1, padding: '8px 12px', overflowY: 'auto' }}>
-          {user.role === 'admin' && (<>
-            <SidebarBtn tab="dashboard" icon={<Shield size={18} />} label="Admin Hub" />
-            <SidebarBtn tab="users" icon={<Users size={18} />} label="Manage Users" />
-            <SidebarBtn tab="leaves_admin" icon={<FileText size={18} />} label="Leave Board" />
-            <SidebarBtn tab="salary" icon={<DollarSign size={18} />} label="Salary & Payroll" />
-            <SidebarBtn tab="activity" icon={<Activity size={18} />} label="System Logs" />
-          </>)}
-          {user.role === 'hr' && (<>
-            <SidebarBtn tab="dashboard" icon={<Shield size={18} />} label="HR Dashboard" />
-            <SidebarBtn tab="users" icon={<Users size={18} />} label="Employee Records" />
-            <SidebarBtn tab="leaves_admin" icon={<FileText size={18} />} label="Leave Approvals" />
-            <SidebarBtn tab="salary" icon={<DollarSign size={18} />} label="Salary & Payroll" />
-            <SidebarBtn tab="activity" icon={<CheckCircle size={18} />} label="Attendance Log" />
-          </>)}
-          {user.role === 'team_lead' && (<>
-            <SidebarBtn tab="dashboard" icon={<Briefcase size={18} />} label="Lead Center" />
-            <SidebarBtn tab="assign_tasks" icon={<UserPlus size={18} />} label="Assign Tasks" />
-            <SidebarBtn tab="team_progress" icon={<FolderGit2 size={18} />} label="Team Progress" />
-            <SidebarBtn tab="leaves_me" icon={<Calendar size={18} />} label="My Leaves" />
-            <SidebarBtn tab="payslip" icon={<Printer size={18} />} label="My Payslip" />
-          </>)}
-          {user.role === 'intern' && (<>
-            <SidebarBtn tab="dashboard" icon={<LayoutDashboard size={18} />} label="Intern Portal" />
-            <SidebarBtn tab="my_tasks" icon={<ListTodo size={18} />} label="Assigned Tasks" />
-            <SidebarBtn tab="leaves_me" icon={<Calendar size={18} />} label="My Leaves" />
-            <SidebarBtn tab="payslip" icon={<Printer size={18} />} label="My Payslip" />
-          </>)}
-          {user.role === 'employee' && (<>
-            <SidebarBtn tab="dashboard" icon={<LayoutDashboard size={18} />} label="My Dashboard" />
-            <SidebarBtn tab="leaves_me" icon={<Calendar size={18} />} label="My Leaves" />
-            <SidebarBtn tab="payslip" icon={<Printer size={18} />} label="My Payslip" />
-          </>)}
+          {user && getNavCategories(user.role).map(cat => (
+            <div key={cat.id} className="accordion-group">
+              <button 
+                className="accordion-header" 
+                onClick={() => setOpenCategory(openCategory === cat.id ? '' : cat.id)}
+                aria-expanded={openCategory === cat.id}
+              >
+                <span>{cat.title}</span>
+                <ChevronDown size={14} className={`chevron-icon ${openCategory === cat.id ? 'rotated' : ''}`} />
+              </button>
+              <div className={`accordion-content ${openCategory === cat.id ? 'open' : ''}`}>
+                {cat.items.map(item => (
+                  <SidebarBtn key={item.tab} tab={item.tab} icon={item.icon} label={item.label} />
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
         <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 10 }}>

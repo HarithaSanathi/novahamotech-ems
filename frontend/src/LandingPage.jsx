@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Calendar, Globe, LogIn, Building2, Users, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Calendar, Globe, LogIn, Building2, Users, Clock, Menu, X } from 'lucide-react';
 
 const TN_HOLIDAYS_2026 = [
   { date: 'Jan 1', name: "New Year's Day" },
@@ -38,29 +38,141 @@ const SG_HOLIDAYS_2026 = [
 
 export default function LandingPage({ onLoginClick }) {
   const [activeCalendar, setActiveCalendar] = useState('tn');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const drawerRef = useRef(null);
+  const menuButtonRef = useRef(null);
+
+  // Keyboard navigation & Focus trap inside mobile drawer
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+        return;
+      }
+
+      if (e.key === 'Tab' && menuOpen && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll(
+          'button, [href], select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length > 0) {
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              last.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === last) {
+              first.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      }
+    };
+
+    if (menuOpen) {
+      document.body.classList.add('scroll-locked');
+      document.addEventListener('keydown', handleKeyDown);
+      const focusable = drawerRef.current?.querySelectorAll('button, [href]');
+      if (focusable && focusable.length > 0) {
+        focusable[0].focus();
+      }
+    } else {
+      document.body.classList.remove('scroll-locked');
+    }
+
+    return () => {
+      document.body.classList.remove('scroll-locked');
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [menuOpen]);
+
+  const scrollToSection = (id) => {
+    setMenuOpen(false);
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' }}>
       {/* NAVBAR */}
-      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 60px', borderBottom: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 100, background: 'rgba(15,23,42,0.8)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <nav className="landing-nav">
+        <div className="landing-nav-logo">
           <div style={{ width: 42, height: 42, borderRadius: '12px', background: 'linear-gradient(135deg, #6366f1, #c084fc)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <img src="/logo1.jpg" alt="Novahamotechnologies" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div>
             <a href="https://novahamotech.com" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-              <div style={{ fontWeight: 800, fontSize: '1.3rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Novahamotechnologies</div>
+              <div style={{ fontWeight: 800, fontSize: '1.3rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Novahamotech</div>
             </a>
             <div style={{ fontSize: '0.65rem', color: '#64748b', letterSpacing: '2px', textTransform: 'uppercase' }}>Employee Management System</div>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Workforce Solutions</span>
-          <button onClick={onLoginClick} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg,#6366f1,#c084fc)', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 24px', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 20px rgba(99,102,241,0.4)', transition: 'all 0.2s' }}>
+
+        {/* Center menu links for desktop */}
+        <div className="landing-nav-links">
+          <button className="landing-nav-link" onClick={() => scrollToSection('home')}>Home</button>
+          <button className="landing-nav-link" onClick={() => scrollToSection('holidays')}>Holiday Calendar</button>
+          <a href="mailto:support@novahamotech.com" className="landing-nav-link" style={{ textDecoration: 'none' }}>Support</a>
+        </div>
+
+        {/* Right content for desktop */}
+        <div className="landing-nav-right">
+          <button onClick={onLoginClick} className="btn-premium" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 24px', fontSize: '0.95rem' }}>
             <LogIn size={18} /> Login to Portal
           </button>
         </div>
+
+        {/* Mobile Hamburger menu trigger */}
+        <button 
+          ref={menuButtonRef}
+          className="landing-hamburger" 
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open navigation menu"
+          aria-expanded={menuOpen}
+        >
+          <Menu size={26} />
+        </button>
       </nav>
+
+      {/* Full-screen Drawer Menu for Mobile */}
+      <div 
+        ref={drawerRef}
+        className={`landing-drawer ${menuOpen ? 'open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation drawer"
+      >
+        <div className="landing-drawer-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <img src="/logo1.jpg" alt="Logo" style={{ width: 36, height: 36, borderRadius: '8px', objectFit: 'cover' }} />
+            <div style={{ fontWeight: 800, fontSize: '1.2rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Novahamotech</div>
+          </div>
+          <button 
+            className="landing-drawer-close" 
+            onClick={() => setMenuOpen(false)}
+            aria-label="Close navigation menu"
+          >
+            <X size={26} />
+          </button>
+        </div>
+
+        <div className="landing-drawer-content">
+          <button className="landing-drawer-link" onClick={() => scrollToSection('home')}>Home</button>
+          <button className="landing-drawer-link" onClick={() => scrollToSection('holidays')}>Holiday Calendar</button>
+          <a href="mailto:support@novahamotech.com" className="landing-drawer-link" style={{ textDecoration: 'none' }}>Support / Contact</a>
+          
+          <button onClick={() => { setMenuOpen(false); onLoginClick(); }} className="btn-premium" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '16px 24px', fontSize: '1.1rem', marginTop: '24px', width: '100%', minHeight: '48px' }}>
+            <LogIn size={20} /> Login to Portal
+          </button>
+        </div>
+      </div>
 
       {/* HERO */}
       <section style={{ textAlign: 'center', padding: '80px 40px 60px' }}>
@@ -93,7 +205,7 @@ export default function LandingPage({ onLoginClick }) {
       </section>
 
       {/* HOLIDAY CALENDAR */}
-      <section style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px 80px' }}>
+      <section id="holidays" style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px 80px' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>📅 Holiday Calendar 2026</h2>
           <p style={{ color: '#64748b', margin: 0 }}>Official public holidays for your region</p>

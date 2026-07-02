@@ -1,5 +1,3 @@
-/*
-  This redirect rule ensures that React Router handles all navigation
-  requests, allowing for direct links and page refreshes.
-*/
+# This redirect rule ensures that React Router handles all navigation
+# requests, allowing for direct links and page refreshes.
 /*    /index.html   200

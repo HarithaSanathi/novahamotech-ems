@@ -3,5 +3,5 @@
   command = "npm install && npm run build"
   publish = "dist"
 
-[context.production.environment]
+[build.environment]
   VITE_API_BASE = "https://novahamotech-backend-7gkj.onrender.com/api"

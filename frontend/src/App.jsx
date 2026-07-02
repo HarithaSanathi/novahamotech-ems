@@ -181,9 +181,6 @@ function App() {
               {loading ? 'Signing in…' : 'Sign In →'}
             </button>
           </form>
-          <div style={{ marginTop: 20, textAlign: 'center', fontSize: '12px', color: '#475569', lineHeight: 1.7 }}>
-            Demo: <strong>admin@ · hr@</strong>
-          </div>
         </div>
       </div>
     );

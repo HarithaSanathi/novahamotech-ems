@@ -15,8 +15,8 @@ function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@attendance.com');
+  const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -175,7 +175,7 @@ function App() {
             </div>
             <div className="input-group">
               <label>Password</label>
-              <input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+              <input type="password" placeholder="admin123" value={password} onChange={e => setPassword(e.target.value)} required />
             </div>
             <button type="submit" className="btn-premium" disabled={loading} style={{ width: '100%', padding: 14, fontSize: '1rem', marginTop: 8 }}>
               {loading ? 'Signing in…' : 'Sign In →'}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import {
   LogOut, Clock, Calendar, User, Shield, CheckCircle, XCircle, Users,
@@ -20,6 +20,17 @@ function App() {
   const [password, setPassword] = useState('admin123');
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const emailInputRef = useRef(null);
+
+  // Auto focus first input field when login form is shown
+  useEffect(() => {
+    if (!showLanding && !user) {
+      setTimeout(() => {
+        emailInputRef.current?.focus();
+      }, 50);
+    }
+  }, [showLanding, user]);
 
   const [openCategory, setOpenCategory] = useState('general');
   const sidebarRef = useRef(null);
@@ -354,28 +365,92 @@ function App() {
   // ── LOGIN FORM ──
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)' }}>
-        <div className="glass-card animate-fade" style={{ width: 420, padding: '48px 40px' }}>
-          <button onClick={() => setShowLanding(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: 24, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)', padding: '20px' }}>
+        <div className="glass-card animate-fade" style={{ width: '100%', maxWidth: '420px', padding: '48px 40px', boxSizing: 'border-box' }}>
+          <button onClick={() => setShowLanding(true)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', marginBottom: 24, fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: 6, minHeight: '44px' }}>
             ← Back to Home
           </button>
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <img src="/logo1.jpg" alt="Novahamotechnologies" style={{ width: 64, height: 64, borderRadius: '16px', objectFit: 'cover', marginBottom: '16px' }} />
-            <div style={{ fontWeight: 900, fontSize: '1.5rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 6 }}>Novahamotechnologies EMS</div>
+            <div style={{ fontWeight: 900, fontSize: '1.5rem', background: 'linear-gradient(135deg,#a5b4fc,#c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 6 }}>Novahamotech EMS</div>
             <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>Sign in to your workspace</p>
           </div>
-          {error && <div style={{ color: '#ef4444', marginBottom: 16, textAlign: 'center', background: 'rgba(239,68,68,0.1)', padding: '12px', borderRadius: 8 }}>{error}</div>}
+          
+          {error && (
+            <div 
+              role="alert"
+              style={{ color: '#ef4444', marginBottom: 20, textAlign: 'center', background: 'rgba(239,68,68,0.1)', padding: '12px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)', fontSize: '0.88rem', fontWeight: 500 }}
+            >
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleLogin}>
             <div className="input-group">
-              <label>Email Address</label>
-              <input type="email" placeholder="admin@attendance.com" value={email} onChange={e => setEmail(e.target.value)} required />
+              <label htmlFor="login-email">Email Address</label>
+              <div className="input-wrapper">
+                <Mail size={18} className="input-icon-left" />
+                <input 
+                  ref={emailInputRef}
+                  id="login-email"
+                  type="email" 
+                  placeholder="Enter your email" 
+                  value={email} 
+                  onChange={e => {
+                    setEmail(e.target.value);
+                    if (error) setError('');
+                  }} 
+                  className={error ? 'input-with-icon input-invalid' : 'input-with-icon'}
+                  required 
+                  autoComplete="email"
+                  aria-invalid={!!error}
+                />
+              </div>
             </div>
-            <div className="input-group">
-              <label>Password</label>
-              <input type="password" placeholder="admin123" value={password} onChange={e => setPassword(e.target.value)} required />
+
+            <div className="input-group" style={{ marginBottom: '24px' }}>
+              <label htmlFor="login-password">Password</label>
+              <div className="input-wrapper">
+                <Lock size={18} className="input-icon-left" />
+                <input 
+                  id="login-password"
+                  type={showPassword ? 'text' : 'password'} 
+                  placeholder="Enter your password" 
+                  value={password} 
+                  onChange={e => {
+                    setPassword(e.target.value);
+                    if (error) setError('');
+                  }} 
+                  className={error ? 'input-with-icon input-invalid' : 'input-with-icon'}
+                  required 
+                  autoComplete="current-password"
+                  aria-invalid={!!error}
+                />
+                <button 
+                  type="button" 
+                  className="password-toggle-btn" 
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn-premium" disabled={loading} style={{ width: '100%', padding: 14, fontSize: '1rem', marginTop: 8 }}>
-              {loading ? 'Signing in…' : 'Sign In →'}
+
+            <button 
+              type="submit" 
+              className="btn-premium" 
+              disabled={loading} 
+              style={{ width: '100%', height: '50px', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: loading ? 'not-allowed' : 'pointer' }}
+            >
+              {loading ? (
+                <span className="spinner-wrapper">
+                  <span className="spinner" />
+                  Signing in...
+                </span>
+              ) : (
+                'Sign In →'
+              )}
             </button>
           </form>
         </div>

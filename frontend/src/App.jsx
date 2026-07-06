@@ -16,8 +16,8 @@ function App() {
   const [showLanding, setShowLanding] = useState(true);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('admin@attendance.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -544,11 +544,11 @@ function App() {
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 32 }}>
           <div>
             <h1 style={{ fontSize: '1.7rem', fontWeight: 800, margin: '0 0 4px' }}>Welcome, {user.name}!</h1>
-            <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>{new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p style={{ color: '#64748b', margin: 0, fontSize: '0.9rem' }}>{new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
           <div className="glass-card" style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: 10 }}>
             <Clock size={18} color="#a5b4fc" />
-            <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '1px' }}>{new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+            <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '1px' }}>{new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </header>
 
@@ -559,6 +559,8 @@ function App() {
               <h3 style={{ fontSize: '1rem', margin: '0 0 16px', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Quick Attendance</h3>
               <div style={{ display: 'flex', gap: 16 }}>
                 <button onClick={() => handleCheck('in')} className="btn-premium" style={{ flex: 1, padding: 20, fontSize: '1rem' }}>Clock <span style={{ color: '#10b981' }}>IN</span></button>
+                <button onClick={() => handleCheck('break_in')} className="btn-premium" style={{ flex: 1, padding: 20, fontSize: '1rem', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>Take <span style={{ color: '#f59e0b' }}>BREAK</span></button>
+                <button onClick={() => handleCheck('break_out')} className="btn-premium" style={{ flex: 1, padding: 20, fontSize: '1rem', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}>Resume <span style={{ color: '#3b82f6' }}>WORK</span></button>
                 <button onClick={() => handleCheck('out')} className="btn-premium" style={{ flex: 1, padding: 20, fontSize: '1rem', background: 'rgba(255,255,255,0.04)', boxShadow: 'none', border: '1px solid rgba(255,255,255,0.1)' }}>Clock <span style={{ color: '#ef4444' }}>OUT</span></button>
               </div>
             </div>
@@ -785,13 +787,15 @@ function App() {
           <div className="animate-fade glass-card" style={{ padding: 32 }}>
             <h3 style={{ fontSize: '1.1rem', marginBottom: 24 }}>Attendance Logs</h3>
             <table style={{ width: '100%' }}>
-              <thead><tr>{['Employee', 'Date', 'Clock In', 'Clock Out'].map(h => <th key={h} style={{ padding: '12px 16px' }}>{h}</th>)}</tr></thead>
+              <thead><tr>{['Employee', 'Date', 'Clock In', 'Break In', 'Break Out', 'Clock Out'].map(h => <th key={h} style={{ padding: '12px 16px' }}>{h}</th>)}</tr></thead>
               <tbody>
                 {adminStats?.records?.map((rec, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '14px 16px' }}>{rec.User?.name}</td>
                     <td style={{ padding: '14px 16px', color: '#64748b' }}>{rec.date}</td>
                     <td style={{ padding: '14px 16px' }}>{rec.clockIn}</td>
+                    <td style={{ padding: '14px 16px', color: '#f59e0b' }}>{rec.breakIn || '-'}</td>
+                    <td style={{ padding: '14px 16px', color: '#3b82f6' }}>{rec.breakOut || '-'}</td>
                     <td style={{ padding: '14px 16px', color: rec.clockOut ? '#f8fafc' : '#f59e0b' }}>{rec.clockOut || 'Still Active'}</td>
                   </tr>
                 ))}

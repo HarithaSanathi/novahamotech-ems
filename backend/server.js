@@ -37,7 +37,9 @@ const User = sequelize.define('User', {
 const Attendance = sequelize.define('Attendance', {
   date: { type: DataTypes.STRING },
   clockIn: { type: DataTypes.STRING },
-  clockOut: { type: DataTypes.STRING }
+  clockOut: { type: DataTypes.STRING },
+  breakIn: { type: DataTypes.STRING },
+  breakOut: { type: DataTypes.STRING }
 });
 
 const Leave = sequelize.define('Leave', {
@@ -90,7 +92,9 @@ Salary.belongsTo(User, { foreignKey: 'userId' });
 
 // --- INITIALIZE DB --- //
 const initDB = async () => {
+  await sequelize.query('PRAGMA foreign_keys = false;');
   await sequelize.sync({ alter: true });
+  await sequelize.query('PRAGMA foreign_keys = true;');
 
   const adminExists = await User.findOne({ where: { email: 'admin@attendance.com' } });
   
@@ -143,19 +147,32 @@ app.post('/api/auth/login', async (req, res) => {
 // --- ATTENDANCE --- //
 app.post('/api/attendance/check', async (req, res) => {
   const { userId, type } = req.body;
-  const today = new Date().toISOString().split('T')[0];
-  const time = new Date().toLocaleTimeString();
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
+  const today = istTime.toISOString().split('T')[0];
+  const time = istTime.toLocaleTimeString('en-US', { timeZone: 'UTC' });
   let record = await Attendance.findOne({ where: { userId, date: today } });
   if (type === 'in') {
     if (record) return res.status(400).json({ message: 'Already clocked in today.' });
     record = await Attendance.create({ userId, date: today, clockIn: time });
-  } else {
+  } else if (type === 'break_in') {
+    if (!record) return res.status(400).json({ message: 'Not clocked in today.' });
+    if (record.breakIn) return res.status(400).json({ message: 'Already taken a break today.' });
+    record.breakIn = time;
+    await record.save();
+  } else if (type === 'break_out') {
+    if (!record || !record.breakIn) return res.status(400).json({ message: 'No active break to resume from.' });
+    if (record.breakOut) return res.status(400).json({ message: 'Already resumed work today.' });
+    record.breakOut = time;
+    await record.save();
+  } else if (type === 'out') {
     if (!record) return res.status(400).json({ message: 'Not clocked in today.' });
     if (record.clockOut) return res.status(400).json({ message: 'Already clocked out.' });
     record.clockOut = time;
     await record.save();
   }
-  res.json({ message: `Successfully clocked ${type}`, record });
+  res.json({ message: `Successfully logged ${type}`, record });
 });
 
 app.get('/api/attendance/:userId', async (req, res) => {
